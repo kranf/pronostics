@@ -14,17 +14,17 @@ class PmuApiClient():
         url = self.program_url.format(date)
         return requests.get(url).json()["programme"]
 
-    def get_participants(date, meeting_id, race_id):
+    def get_participants(self, date, meeting_id, race_id):
         """ Retreives participants of a race identified by a date (ddMMyyyy),
         a meeting_id and a race_id.
         """
         url = self.participant_url.format(date, meeting_id, race_id)
-        return requests.get(url).json()["participants"]
+        return requests.get(url).json()
 
-    def get_detailed_perf(date, meeting_id, race_id):
+    def get_detailed_perf(self, date, meeting_id, race_id):
         """ Retreives participants' last performances
         including the drivers and their weight for a race
         identified by a date (ddMMyyyy), meeting_id and a race_id.
         """
         url = self.detailed_perf_url.format(date, meeting_id, race_id)
-        return requests.get(url).json()["participants"]
+        return requests.get(url).json()
