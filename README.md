@@ -20,6 +20,14 @@ Data are modelised and moved into RDBMS
 Data are transformed into machine input
 Machine is trained and is able to predict next winners :)))
 
+## Dev environment
+Based on virtualenv / virtualenvwrapper
+
+```
+mkvirtualenv pronosticvenv
+add2virtualenv .
+pip install -r requirements.txt
+```
 
 ## Data scrapping
 Raw data are stored as document in mongoDB.
