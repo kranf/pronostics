@@ -15,7 +15,7 @@ Base = declarative_base()
 class Horse(Base):
     __tablename__ = "horse"
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False, unique=True)
+    name = Column(String, nullable=False, index=True, unique=True)
     birth_year = Column(Integer)
     gender = Column(String)
     race = Column(String)
