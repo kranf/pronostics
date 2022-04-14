@@ -43,6 +43,13 @@ docker build .
 Your mongoDB will be listening on localhost:27017
 
 
+## Data Modeling
+
+
+## Data compilation
+Take care to course.categorieParticularite includes "autostart"
+
+
 ## Good to know about horse races
 
 # Music
