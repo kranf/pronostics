@@ -16,6 +16,7 @@ class Horse(Base):
     __tablename__ = "horse"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, unique=True)
+    birth_year = Column(Integer)
     gender = Column(String)
     race = Column(String)
     owner = Column(String)
@@ -25,10 +26,17 @@ class Horse(Base):
     breeder = Column(String)
 
     @staticmethod
-    def fromJson(horseData):
+    def fromJson(horse_data, birth_year):
         return Horse(
-            name = horseData["nom"],
-            gender = horseData["sexe"]
+            name = horse_data["nom"]
+            birth_year = birth_year
+            gender = horse_data["sexe"]
+            race = horse_data["race"]
+            owner = horse_data["proprietaire"]
+            father_name = horse_data["nomPere"]
+            mother_name = horse_data["nomMere"]
+            trainer = horse_data["entraineur"]
+            breeder = horse_data["eleveur"]
         )
 
 
@@ -37,6 +45,13 @@ class Driver(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, unique=True)
     weight = Column(Integer)
+
+    @staticmethod
+    def fromJson(name, weight):
+        return Driver(
+            name =name
+            weight = weight
+        )
 
 
 class Participant(Base):
@@ -59,6 +74,27 @@ class Participant(Base):
     pregnent = Column(Boolean)
     weighed_duration_km = Column(Integer)
 
+    @staticmethod
+    def fromJson(participant_data, race_id, horse_id, driver_id):
+        """
+        @params: Participant_date as returned participants endpoint
+        """
+        return Participant(
+            race_id = race_id
+            rank = participant_data["ordreArrivee"]
+            horse_id = horse_id
+            driver_id = driver_id
+            driver_change = participant_data["driverChange"]
+            pmu_id = participant_data["numPmu"]
+            disadvantage_value = participant_data["handicapValeur"]
+            disadvantage_weight = participant_data["handicapPoids"]
+            disadvantage_length = participant_data["handicapDistance"]
+            blinders = participant_data["oeilleres"]
+            lane_id = participant_data["placeCorde"]
+            music = participant_data["musique"]
+            pregnent = participant_data["jumentPleine"]
+            weighed_duration_km = participant_data["reductionKilometrique"]
+        )
 
 class Race(Base):
     __tablename__ = "race"
