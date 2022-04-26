@@ -1,3 +1,7 @@
+import datetime
+
+from bson import ObjectId
+
 from source import settings
 import pymongo
 
@@ -6,9 +10,9 @@ class DataService():
 
     def __init__(self, mongo_db):
         self.mongo_db = mongo_db
-        self.create_indexes()
+        self._create_indexes()
 
-    def create_indexes(self):
+    def _create_indexes(self):
         self.mongo_db.programs.create_index([("date_string", pymongo.ASCENDING)], unique=True)
         self.mongo_db.participants.create_index([("race_id", pymongo.ASCENDING)], unique=True)
         self.mongo_db.participants_detailed_perf.create_index([("race_id", pymongo.ASCENDING)], unique=True)
