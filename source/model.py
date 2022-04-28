@@ -114,8 +114,8 @@ class Race(Base):
     @staticmethod
     def fromJson(race_data, meeting_data):
         return Race(
-            meeting_id=race_data["numReunion"],
-            race_id=race_data["numOrdre"],
+            meeting_id=int(race_data["numReunion"]),
+            race_id=int(race_data["numOrdre"]),
             start_date=get_date_time_from_timestamp_with_offset(race_data["heureDepart"], race_data["timezoneOffset"]),
             name=race_data["libelle"],
             length=race_data["distance"],
