@@ -1,12 +1,10 @@
-import datetime
-
-from bson import ObjectId
-
+from datetime import datetime
 from source import settings
 import pymongo
+from source.model import Race
 
 
-class DataService():
+class ScrappedDataService:
 
     def __init__(self, mongo_db):
         self.mongo_db = mongo_db
@@ -26,6 +24,7 @@ class DataService():
         return self.mongo_db.latest_scrapping.insert_one({"latest": _date.strftime(settings.DATE_FORMAT)})
 
     def save_program(self, program, date_string):
+        """ :param: date_string ddMMYYYY date of the program"""
         program["date_string"] = date_string
         return self.mongo_db.programs.insert_one(program)
 
@@ -40,5 +39,13 @@ class DataService():
     def get_all_programs(self):
         return self.mongo_db.programs.find()
 
-    def get_program_by_date(self, date):
-        return self.mongo_db.programs.find_one({"_id": ObjectId(date)})
+    def get_races_by_date(self, date_string):
+        """ :param date_string ddMMYYYY date of the program"""
+        program = self.mongo_db.programs.find_one({"date_string": date_string})
+        races = []
+        for meeting in program['reunions']:
+            for race in meeting['courses']:
+                races.append(Race.fromJson(race, meeting))
+        meetings = [meeting for meeting in program['reunions']]
+        races = [race for race in meeting]
+        return [Race.fromJson(race, meeting) for meeting in program['reunions'] for race in meeting['courses']]
