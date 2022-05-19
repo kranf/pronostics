@@ -4,7 +4,7 @@ from sqlalchemy import (
     Integer,
     String,
     DateTime,
-    ForeignKey
+    ForeignKey, UniqueConstraint
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
@@ -110,6 +110,7 @@ class Race(Base):
     racetrack_name = Column(String)
     racetrack_type = Column(String)
     participants = relationship("Participant")
+    UniqueConstraint(start_date, race_id, meeting_id)
 
     @staticmethod
     def fromJson(race_data, meeting_data):
