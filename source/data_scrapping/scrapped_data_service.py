@@ -2,6 +2,7 @@ from datetime import datetime
 from source import settings
 import pymongo
 from source.model import Race
+from source.utils import get_date_string_from_date
 
 
 class ScrappedDataService:
@@ -39,13 +40,13 @@ class ScrappedDataService:
     def get_all_programs(self):
         return self.mongo_db.programs.find()
 
-    def get_races_by_date(self, date_string):
-        """ :param date_string ddMMYYYY date of the program"""
-        program = self.mongo_db.programs.find_one({"date_string": date_string})
+    def get_races_by_date(self, date_of_the_races):
+        """ :param date_of_the_races of the program as string ddMMYYYY or date"""
+
+        _date = date_of_the_races if isinstance(date_of_the_races, str) else get_date_string_from_date(date_of_the_races)
+        program = self.mongo_db.programs.find_one({"date_string": _date})
         races = []
         for meeting in program['reunions']:
             for race in meeting['courses']:
                 races.append(Race.fromJson(race, meeting))
-        meetings = [meeting for meeting in program['reunions']]
-        races = [race for race in meeting]
         return [Race.fromJson(race, meeting) for meeting in program['reunions'] for race in meeting['courses']]

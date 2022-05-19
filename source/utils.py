@@ -17,5 +17,5 @@ def get_datetime_from_string(date_string):
     return datetime.strptime(date_string, settings.DATE_FORMAT)
 
 
-def get_date_date_string_from_date(a_date):
+def get_date_string_from_date(a_date):
     return date.strftime(a_date, settings.DATE_FORMAT)
