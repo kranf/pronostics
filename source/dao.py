@@ -28,10 +28,10 @@ class RaceDao:
         self.session = session
 
     def save_race(self, race):
-        self.session.add(race)
+        return self.session.add(race)
 
     def get_race_by_identity(self, date, meeting_id, race_id):
         """Identity is aggregation of date, meeting_id and race_id"""
-        statement = select(Race).where(Race.start_date == date)
+        statement = select(Race).where(Race.start_date > date, Race.meeting_id == meeting_id, Race.race_id == race_id)
         race = self.session.execute(statement).scalars()
         return race
