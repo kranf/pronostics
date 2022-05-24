@@ -45,8 +45,4 @@ class ScrappedDataService:
 
         _date = date_of_the_races if isinstance(date_of_the_races, str) else get_date_string_from_date(date_of_the_races)
         program = self.mongo_db.programs.find_one({"date_string": _date})
-        races = []
-        for meeting in program['reunions']:
-            for race in meeting['courses']:
-                races.append(Race.fromJson(race, meeting))
-        return [Race.fromJson(race, meeting) for meeting in program['reunions'] for race in meeting['courses']]
+        return [Race.fromJson(race, meeting, program['date_string']) for meeting in program['reunions'] for race in meeting['courses']]

@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from source.model import Base, Horse, Race
 from sqlalchemy import select
 
+from source.utils import get_date_string_from_date
+
 
 def create_session(db_uri):
     engine = create_engine(db_uri)
@@ -28,10 +30,23 @@ class RaceDao:
         self.session = session
 
     def save_race(self, race):
-        return self.session.add(race)
+        existing_race = self.get_race_by_identity(get_date_string_from_date(race.start_date), race.meeting_id,
+                                                  race.race_id)
+        if not existing_race:
+            self.session.add(race)
+            return self.get_race_by_identity(get_date_string_from_date(race.start_date), race.meeting_id,
+                                                  race.race_id)
+
+        return existing_race
 
     def get_race_by_identity(self, date, meeting_id, race_id):
         """Identity is aggregation of date, meeting_id and race_id"""
-        statement = select(Race).where(Race.start_date > date, Race.meeting_id == meeting_id, Race.race_id == race_id)
-        race = self.session.execute(statement).scalars()
-        return race
+        statement = select(Race).where(Race.date_string == date, Race.meeting_id == meeting_id, Race.race_id == race_id)
+        result = self.session.execute(statement).scalars().all()
+        if len(result) == 0:
+            return None
+
+        if len(result) > 1:
+            raise RuntimeError()
+
+        return result[0]

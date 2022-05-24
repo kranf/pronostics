@@ -30,7 +30,6 @@ END_DATE = args.end_date or date.strftime(date.today() - timedelta(days=1), sett
 date_iterator = get_iterator(START_DATE, END_DATE)
 
 
-
 DB_URI = os.environ['MODEL_DB_URI']
 
 session = create_session(DB_URI)
@@ -44,7 +43,7 @@ for date_cursor in date_iterator:
     with session.begin():
         for race in races:
             saved_race = race_dao.save_race(race)
-            logging.info(f'Race {race.name} saved with id {race.id}')
+            logging.info(f'Race {saved_race.name} saved with id {saved_race.id}')
         session.commit()
 #
 # # races = race_dao.get_race_by_identity(datetime.strptime('29032022', settings.DATE_FORMAT), 1, 6)

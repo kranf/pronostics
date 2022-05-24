@@ -81,7 +81,8 @@ class Participant(Base):
         return Participant(
             race_id=race_id, rank=participant_data["ordreArrivee"], horse_id=horse_id, driver_id=driver_id,
             driver_change=participant_data["driverChange"], pmu_id=participant_data["numPmu"],
-            disadvantage_value=participant_data["handicapValeur"], disadvantage_weight=participant_data["handicapPoids"],
+            disadvantage_value=participant_data["handicapValeur"],
+            disadvantage_weight=participant_data["handicapPoids"],
             disadvantage_length=participant_data["handicapDistance"], blinders=participant_data["oeilleres"],
             lane_id=participant_data["placeCorde"], music=participant_data["musique"],
             pregnent=participant_data["jumentPleine"], weighed_duration_km=participant_data["reductionKilometrique"])
@@ -92,6 +93,7 @@ class Race(Base):
     id = Column(Integer, primary_key=True)
     meeting_id = Column(String, nullable=False)  # Reunion
     race_id = Column(String, nullable=False)  # Course
+    date_string = Column(String)  # date as referred in interfaces
     start_date = Column(DateTime, nullable=False)
     name = Column(String, nullable=False)  # Libelle
     length = Column(Integer)
@@ -113,10 +115,11 @@ class Race(Base):
     UniqueConstraint(start_date, race_id, meeting_id)
 
     @staticmethod
-    def fromJson(race_data, meeting_data):
+    def fromJson(race_data, meeting_data, date_string):
         return Race(
             meeting_id=int(race_data["numReunion"]),
             race_id=int(race_data["numOrdre"]),
+            date_string=date_string,
             start_date=get_date_time_from_timestamp_with_offset(race_data["heureDepart"], race_data["timezoneOffset"]),
             name=race_data["libelle"],
             length=race_data["distance"],
@@ -131,5 +134,7 @@ class Race(Base):
             conditions=race_data["conditions"],
             duration=race_data["dureeCourse"] if "dureeCourse" in race_data else None,
             number_of_participants=race_data["nombreDeclaresPartants"],
-            penetrometre_value=race_data["penetrometre"]["valeurMesure"] if "penetrometre" in race_data and "valeurMesure" in race_data["penetrometre"] else None,
+            penetrometre_value=race_data["penetrometre"][
+                "valeurMesure"] if "penetrometre" in race_data and "valeurMesure" in race_data[
+                "penetrometre"] else None,
             racetrack_name=race_data["hippodrome"]["libelleLong"])
