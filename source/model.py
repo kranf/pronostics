@@ -37,7 +37,7 @@ class Horse(Base):
             father_name=horse_data["nomPere"],
             mother_name=horse_data["nomMere"],
             trainer=horse_data["entraineur"],
-            breeder=horse_data["eleveur"])
+            breeder=horse_data["eleveur"] if "eleveur" in horse_data else None, )
 
 
 class Driver(Base):
@@ -60,7 +60,7 @@ class Participant(Base):
     rank = Column(Integer)
     horse_id = Column(Integer, ForeignKey("horse.id"))
     horse = relationship("Horse")
-    driver_id = Column(Integer, ForeignKey("driver.id"))
+    driver_name = Column(String, ForeignKey("driver.name"))
     driver = relationship("Driver")
     driver_change = Column(Boolean)
     pmu_id = Column(Integer)
@@ -74,14 +74,14 @@ class Participant(Base):
     weighed_duration_km = Column(Integer)
 
     @staticmethod
-    def fromJson(participant_data, race_id, horse_id, driver_id):
+    def fromJson(participant_data, race_id, horse_id):
         """
         @params: Participant_date as returned participants endpoint
         """
         return Participant(
-            race_id=race_id, rank=participant_data["ordreArrivee"], horse_id=horse_id, driver_id=driver_id,
-            driver_change=participant_data["driverChange"], pmu_id=participant_data["numPmu"],
-            disadvantage_value=participant_data["handicapValeur"],
+            race_id=race_id, rank=participant_data["ordreArrivee"], horse_id=horse_id,
+            driver_name=participant_data['driver'], driver_change=participant_data["driverChange"],
+            pmu_id=participant_data["numPmu"], disadvantage_value=participant_data["handicapValeur"],
             disadvantage_weight=participant_data["handicapPoids"],
             disadvantage_length=participant_data["handicapDistance"], blinders=participant_data["oeilleres"],
             lane_id=participant_data["placeCorde"], music=participant_data["musique"],
@@ -113,6 +113,13 @@ class Race(Base):
     racetrack_type = Column(String)
     participants = relationship("Participant")
     UniqueConstraint(start_date, race_id, meeting_id)
+
+    def get_pmu_id(self):
+        return self.build_pmu_id(self.date_string, self.meeting_id, self.race_id)
+
+    @staticmethod
+    def build_pmu_id(date_string, meeting_id, race_id):
+        return F'{date_string}R{meeting_id}C{race_id}'
 
     @staticmethod
     def fromJson(race_data, meeting_data, date_string):
