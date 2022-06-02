@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from dotenv import load_dotenv
 
 from source import settings
-from source.dao import RaceDao, create_session, HorseDao
+from source.dao import RaceDao, create_session, HorseDao, DriverDao
 from source.data_scrapping import get_mongo_data_service
 from source.date_iterator import get_iterator
 from source.model import Race, Participant, Horse, Driver
@@ -36,6 +36,7 @@ session = create_session(DB_URI)
 
 race_dao = RaceDao(session)
 horse_dao = HorseDao(session)
+driver_dao = DriverDao(session)
 
 for date_cursor in date_iterator:
 
@@ -43,10 +44,10 @@ for date_cursor in date_iterator:
     logging.info(f'Dealing with {date_string}')
     program = data_service.get_program_for_date(date_cursor)
 
-    for meeting in program['reunions']:
-        for raw_race in meeting['courses']:
-            _race = Race.fromJson(raw_race, meeting, date_string)
-            with session.begin():
+    with session.begin():
+        for meeting in program['reunions']:
+            for raw_race in meeting['courses']:
+                _race = Race.fromJson(raw_race, meeting, date_string)
                 race = race_dao.save_race(_race)
                 logging.info(f'Race {race.get_pmu_id()}({race.name}) saved with id {race.id}')
                 raw_participants = data_service.get_participants_for_race(race)
@@ -56,9 +57,15 @@ for date_cursor in date_iterator:
                     logging.info(f'Horse {horse.name} saved with id {horse.id}')
                     _participant = Participant.fromJson(raw_participant, race.id, horse.id)
 
+                raw_participants_detailed_perf = data_service.get_participants_detailed_perf_for_race(race)
+                if len(raw_participants_detailed_perf) > 0:
+                    for raw_participant_detailed_perf in raw_participants_detailed_perf:
+                        for participant_race in raw_participant_detailed_perf['coursesCourues']:
+                            for driver_details in participant_race['participants']:
+                                if 'poidsJockey' in driver_details:
+                                    _driver = Driver.fromJson(driver_details['nomJockey'], driver_details['poidsJockey'])
+                                    driver = driver_dao.save_driver(_driver)
+                                    logging.info(f'Driver {driver.name} saved with id {driver.id}')
+        session.commit()
 
-                # raw_participants_detailed_perf = data_service.get_participants_detailed_perf_for_race(race)
-                # for raw_participants_detailed_perf in raw_participants_detailed_perf:
-                #     detailed_perf = filter(lambda participant: participant['nomCheval'] == raw_participant['name'], raw_participants_detailed_perf )
-                #     _driver = Driver.fromJson()
-                session.commit()
+

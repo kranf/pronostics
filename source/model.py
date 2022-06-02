@@ -34,7 +34,7 @@ class Horse(Base):
             gender=horse_data["sexe"],
             race=horse_data["race"],
             owner=horse_data["proprietaire"],
-            father_name=horse_data["nomPere"],
+            father_name=horse_data["nomPere"] if "nomPere" in horse_data else None,
             mother_name=horse_data["nomMere"],
             trainer=horse_data["entraineur"],
             breeder=horse_data["eleveur"] if "eleveur" in horse_data else None, )
@@ -79,13 +79,18 @@ class Participant(Base):
         @params: Participant_date as returned participants endpoint
         """
         return Participant(
-            race_id=race_id, rank=participant_data["ordreArrivee"], horse_id=horse_id,
+            race_id=race_id, rank=participant_data["ordreArrivee"] if "ordreArrivee" in participant_data else None,
+            horse_id=horse_id,
             driver_name=participant_data['driver'], driver_change=participant_data["driverChange"],
-            pmu_id=participant_data["numPmu"], disadvantage_value=participant_data["handicapValeur"],
-            disadvantage_weight=participant_data["handicapPoids"],
-            disadvantage_length=participant_data["handicapDistance"], blinders=participant_data["oeilleres"],
-            lane_id=participant_data["placeCorde"], music=participant_data["musique"],
-            pregnent=participant_data["jumentPleine"], weighed_duration_km=participant_data["reductionKilometrique"])
+            pmu_id=participant_data["numPmu"],
+            disadvantage_value=participant_data["handicapValeur"] if "handicapValeur" in participant_data else None,
+            disadvantage_weight=participant_data["handicapPoids"] if "handicapPoids" in participant_data else None,
+            disadvantage_length=participant_data["handicapDistance"] if "handicapDistance" in participant_data else None,
+            blinders=participant_data["oeilleres"],
+            lane_id=participant_data["placeCorde"] if "placeCorde" in participant_data else None,
+            music=participant_data["musique"],
+            pregnent=participant_data["jumentPleine"],
+            weighed_duration_km=participant_data["reductionKilometrique"] if "reductionKilometrique" in participant_data else None)
 
 
 class Race(Base):

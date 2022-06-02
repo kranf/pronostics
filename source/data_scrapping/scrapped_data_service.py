@@ -447,4 +447,5 @@ class ScrappedDataService:
     def get_participants_detailed_perf_for_race(self, race):
         """ :param race """
 
-        return self.mongo_db.participants_detailed_perf.find_one({"pmu_id": race.get_pmu_id()})['participants']
+        result = self.mongo_db.participants_detailed_perf.find_one({"pmu_id": race.get_pmu_id()})
+        return result['participants'] if result and 'participants' in result else []
