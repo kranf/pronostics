@@ -72,6 +72,7 @@ class Participant(Base):
     music = Column(String)
     pregnent = Column(Boolean)
     weighed_duration_km = Column(Integer)
+    UniqueConstraint(race_id, horse_id)
 
     @staticmethod
     def fromJson(participant_data, race_id, horse_id):

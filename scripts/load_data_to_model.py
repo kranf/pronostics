@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from dotenv import load_dotenv
 
 from source import settings
-from source.dao import RaceDao, create_session, HorseDao, DriverDao
+from source.dao import RaceDao, create_session, HorseDao, DriverDao, ParticipantDao
 from source.data_scrapping import get_mongo_data_service
 from source.date_iterator import get_iterator
 from source.model import Race, Participant, Horse, Driver
@@ -37,6 +37,7 @@ session = create_session(DB_URI)
 race_dao = RaceDao(session)
 horse_dao = HorseDao(session)
 driver_dao = DriverDao(session)
+participant_dao = ParticipantDao(session)
 
 for date_cursor in date_iterator:
 
@@ -56,6 +57,8 @@ for date_cursor in date_iterator:
                     horse = horse_dao.save_horse(_horse)
                     logging.info(f'Horse {horse.name} saved with id {horse.id}')
                     _participant = Participant.fromJson(raw_participant, race.id, horse.id)
+                    participant = participant_dao.save_participant(_participant)
+                    logging.info(f'Saving {participant.horse.name} for race {participant.race.get_pmu_id()}')
 
                 raw_participants_detailed_perf = data_service.get_participants_detailed_perf_for_race(race)
                 if len(raw_participants_detailed_perf) > 0:

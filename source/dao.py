@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from source.model import Base, Horse, Race, Driver
+from source.model import Base, Horse, Race, Driver, Participant
 from sqlalchemy import select
 
 
@@ -51,25 +51,26 @@ class HorseDao:
 
         return result[0]
 
-# class ParticipantDao:
-#     def __init__(self, session):
-#         self.session = session
-#
-#     def save_participant(self, participant):
-#         if not self.get_horse_by_name(participant.name):
-#             self.session.add(participant)
-#         return self.get_horse_by_name(participant.name)
-#
-#     def get_participants_by_name(self, name):
-#         statement = select(Horse).where(Horse.name == name)
-#         result = self.session.execute(statement).scalars().all()
-#         if len(result) == 0:
-#             return None
-#
-#         if len(result) > 1:
-#             raise RuntimeError()
-#
-#         return result[0]
+
+class ParticipantDao:
+    def __init__(self, session):
+        self.session = session
+
+    def save_participant(self, participant):
+        if not self.get_participant_by_race(participant.race_id, participant.horse_id):
+            self.session.add(participant)
+        return self.get_participant_by_race(participant.race_id, participant.horse_id)
+
+    def get_participant_by_race(self, race_id, horse_id):
+        statement = select(Participant).where(Participant.race_id == race_id, Participant.horse_id == horse_id)
+        result = self.session.execute(statement).scalars().all()
+        if len(result) == 0:
+            return None
+
+        if len(result) > 1:
+            raise RuntimeError()
+
+        return result[0]
 
 
 class RaceDao:
