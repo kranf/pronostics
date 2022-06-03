@@ -23,6 +23,10 @@ class ScrappedDataService:
         return datetime.strptime(date_latest, settings.DATE_FORMAT).date()
 
     def set_latest_scrapping(self, _date):
+        current_latest = self.get_latest_scrapping()
+        if not _date > current_latest:
+            return
+
         self.mongo_db.latest_scrapping.delete_many({})
         return self.mongo_db.latest_scrapping.insert_one({"latest": _date.strftime(settings.DATE_FORMAT)})
 

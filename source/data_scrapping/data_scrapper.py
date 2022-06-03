@@ -46,22 +46,23 @@ class DataScrapper():
                             "Participants for {}R{}C{} already exists".format(date_cursor_string, meeting_id, race_id))
 
                     try:
-                        participants_detailed_perf = self.pmu_api_client.get_detailed_perf(date_cursor_string, meeting_id,
-                                                                                       race_id)
+                        participants_detailed_perf = self.pmu_api_client.get_detailed_perf(date_cursor_string,
+                                                                                           meeting_id,
+                                                                                           race_id)
                     except Exception as err:
-                        logging.warning(f'Failed to get detailed perf for {date_cursor_string}R{meeting_id}C{race_id}: {err}')
-
-                    try:
-                        self.data_service.save_participants_detailed_perf(participants_detailed_perf,
-                                                                          date_cursor_string, meeting_id, race_id)
-                    except DuplicateKeyError:
                         logging.warning(
-                            "Participants details for {}R{}C{} already exists".format(date_cursor_string, meeting_id,
-                                                                                      race_id))
+                            f'Failed to get detailed perf for {date_cursor_string}R{meeting_id}C{race_id}: {err}')
 
-        else:
-            if date_cursor:
-                self.data_service.set_latest_scrapping(date_cursor)
+                    if participants_detailed_perf:
+                        try:
+                            self.data_service.save_participants_detailed_perf(participants_detailed_perf,
+                                                                              date_cursor_string, meeting_id, race_id)
+                        except DuplicateKeyError:
+                            logging.warning(
+                                "Participants details for {}R{}C{} already exists".format(date_cursor_string,
+                                                                                          meeting_id,
+                                                                                          race_id))
+            self.data_service.set_latest_scrapping(date_cursor)
 
         logging.info('Scrapping finished')
 
