@@ -82,7 +82,8 @@ class Participant(Base):
         return Participant(
             race_id=race_id, rank=participant_data["ordreArrivee"] if "ordreArrivee" in participant_data else None,
             horse_id=horse_id,
-            driver_name=participant_data['driver'], driver_change=participant_data["driverChange"],
+            driver_name=participant_data['driver'] if 'driver' in participant_data else None,
+            driver_change=participant_data["driverChange"],
             pmu_id=participant_data["numPmu"],
             disadvantage_value=participant_data["handicapValeur"] if "handicapValeur" in participant_data else None,
             disadvantage_weight=participant_data["handicapPoids"] if "handicapPoids" in participant_data else None,

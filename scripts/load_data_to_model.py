@@ -58,8 +58,9 @@ for date_cursor in date_iterator:
                     logging.info(f'Horse {horse.name} saved with id {horse.id}')
                     _participant = Participant.fromJson(raw_participant, race.id, horse.id)
                     participant = participant_dao.save_participant(_participant)
-                    logging.info(f'Saving {participant.horse.name} for race {participant.race.get_pmu_id()}')
+                    logging.info(f'Saving {participant.horse.name} for race {race.get_pmu_id()}')
 
+                logging.info(f'Retrieving driver details')
                 raw_participants_detailed_perf = data_service.get_participants_detailed_perf_for_race(race)
                 if len(raw_participants_detailed_perf) > 0:
                     for raw_participant_detailed_perf in raw_participants_detailed_perf:
