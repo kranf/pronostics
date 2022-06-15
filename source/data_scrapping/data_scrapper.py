@@ -3,7 +3,10 @@ import logging
 from source import settings
 from pymongo.errors import DuplicateKeyError
 
+from source.date_iterator import get_iterator
+
 ONE_DAY_DURATION = timedelta(days=1)
+
 
 class DataScrapper():
 
@@ -13,8 +16,8 @@ class DataScrapper():
 
     def scrap(self, start_date_string=None):
         start_date = self.get_date_as_date(start_date_string) \
-                        if start_date_string \
-                        else self.data_service.get_latest_scrapping() + ONE_DAY_DURATION # + one  because latest scrapping date has been processed
+            if start_date_string \
+            else self.data_service.get_latest_scrapping() + ONE_DAY_DURATION  # + one  because latest scrapping date has been processed
 
         logging.info("Starting scrapping from date: {}".format(self.get_date_as_string(start_date)))
         date_itr = self.get_until_yesterday_date_iterator(start_date)
@@ -32,29 +35,40 @@ class DataScrapper():
                 meeting_id = meeting["numOfficiel"]
                 for race in meeting["courses"]:
                     race_id = race["numOrdre"]
-                    logging.info("{} - Meeting {} - Race {} - {}".format(date_cursor_string, meeting_id, race_id, meeting["hippodrome"]["libelleLong"]))
+                    logging.info("{} - Meeting {} - Race {} - {}".format(date_cursor_string, meeting_id, race_id,
+                                                                         meeting["hippodrome"]["libelleLong"]))
 
                     participants = self.pmu_api_client.get_participants(date_cursor_string, meeting_id, race_id)
                     try:
                         self.data_service.save_participants(participants, date_cursor_string, meeting_id, race_id)
                     except DuplicateKeyError:
-                        logging.warning("Participants for {}R{}C{} already exists".format(date_cursor_string, meeting_id, race_id))
+                        logging.warning(
+                            "Participants for {}R{}C{} already exists".format(date_cursor_string, meeting_id, race_id))
 
-                    participants_detailed_perf = self.pmu_api_client.get_detailed_perf(date_cursor_string, meeting_id, race_id)
                     try:
-                        self.data_service.save_participants_detailed_perf(participants_detailed_perf, date_cursor_string, meeting_id, race_id)
-                    except DuplicateKeyError:
-                        logging.warning("Participants details for {}R{}C{} already exists".format(date_cursor_string, meeting_id, race_id))
+                        participants_detailed_perf = self.pmu_api_client.get_detailed_perf(date_cursor_string,
+                                                                                           meeting_id,
+                                                                                           race_id)
+                    except Exception as err:
+                        logging.warning(
+                            f'Failed to get detailed perf for {date_cursor_string}R{meeting_id}C{race_id}: {err}')
 
-        else:
-            if date_cursor:
-                self.data_service.set_latest_scrapping(date_cursor)
+                    if participants_detailed_perf:
+                        try:
+                            self.data_service.save_participants_detailed_perf(participants_detailed_perf,
+                                                                              date_cursor_string, meeting_id, race_id)
+                        except DuplicateKeyError:
+                            logging.warning(
+                                "Participants details for {}R{}C{} already exists".format(date_cursor_string,
+                                                                                          meeting_id,
+                                                                                          race_id))
+            self.data_service.set_latest_scrapping(date_cursor)
 
         logging.info('Scrapping finished')
 
     def get_until_yesterday_date_iterator(self, start_date):
         yesterday = date.today() - ONE_DAY_DURATION
-        return DateIterable(start_date, yesterday)
+        return get_iterator(start_date, yesterday)
 
     def get_date_as_date(self, date_string):
         return datetime.strptime(date_string, settings.DATE_FORMAT).date()
@@ -63,21 +77,4 @@ class DataScrapper():
         return date_date.strftime(settings.DATE_FORMAT)
 
     def get_date_as_string_from_timestamp(self, time_stamp):
-        return self.get_date_as_string(date.fromtimestamp(time_stamp/1000))
-
-class DateIterable:
-
-    def __init__(self, start_date, end_date):
-        self.start_date = start_date
-        self.end_date = end_date
-        self._present_day = start_date
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self._present_day >= self.end_date:
-            raise StopIteration
-        today = self._present_day
-        self._present_day += timedelta(days=1)
-        return today
+        return self.get_date_as_string(date.fromtimestamp(time_stamp / 1000))

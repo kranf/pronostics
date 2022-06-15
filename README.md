@@ -1,12 +1,11 @@
 ## AI project
-#
 # goal of this project is to get hands on AI and machine learning
 # It's based on Pytorch techno
 #
 # It is a horse race pronostics application
 #
 
-##Data source:
+## Data source:
 https://online.turfinfo.api.pmu.fr/rest/client/1/programme/26052017?meteo=true&specialisation=INTERNET
 
 https://online.turfinfo.api.pmu.fr/rest/client/1/programme/26052021/R1/C1/participants?specialisation=INTERNET
@@ -14,7 +13,7 @@ https://online.turfinfo.api.pmu.fr/rest/client/1/programme/26052021/R1/C1/partic
 https://online.turfinfo.api.pmu.fr/rest/client/61/programme/16032022/R1/C1/performances-detaillees/pretty
 
 
-##Overview
+## Overview
 Data are scrapped from PMU APIs and stored as is in mongodb (docker) for availability purpose
 Data are modelised and moved into RDBMS
 Data are transformed into machine input
@@ -43,6 +42,13 @@ docker build .
 Your mongoDB will be listening on localhost:27017
 
 
+## Data Modeling
+
+
+## Data compilation
+Take care to course.categorieParticularite includes "autostart"
+
+
 ## Good to know about horse races
 
 # Music
@@ -53,12 +59,12 @@ La musique se lit de gauche à droite, la gauche correspondant à la course la p
     Les chiffres correspondent aux places d’arrivée du cheval : ils vont de 1 à 9, un 0 signifiant que le cheval est arrivé après la 9ème place (non classé).
 
     Les lettres minuscules renvoient à la discipline de la course
-        (p)=plat
+        (p) = plat
         (m) = trot monté
         (a) = trot attelé
         (o) = obstacles
         (c)= cross
-        (h)=haies
+        (h) = haies
 
     Les lettres majuscules  indiquent les fautes s’il y en a eu :
         (A) = arrêté
