@@ -443,13 +443,13 @@ class ScrappedDataService:
             date_of_the_races)
         return self.mongo_db.programs.find_one({"date_string": _date})
 
-    def get_participants_for_race(self, race):
+    def get_participants_for_race(self, pmu_id):
         """ :param race """
 
-        return self.mongo_db.participants.find_one({RACE_PMU_ID: race.get_pmu_id()})['participants']
+        return self.mongo_db.participants.find_one({RACE_PMU_ID: pmu_id})['participants']
 
-    def get_participants_detailed_perf_for_race(self, race):
+    def get_participants_detailed_perf_for_race(self, pmu_id):
         """ :param race """
 
-        result = self.mongo_db.participants_detailed_perf.find_one({"pmu_id": race.get_pmu_id()})
+        result = self.mongo_db.participants_detailed_perf.find_one({"pmu_id": pmu_id})
         return result['participants'] if result and 'participants' in result else []

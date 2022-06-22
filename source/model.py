@@ -6,8 +6,9 @@ from sqlalchemy import (
     DateTime,
     ForeignKey, UniqueConstraint
 )
-from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+
 from .utils import get_date_time_from_timestamp_with_offset
 
 Base = declarative_base()
@@ -87,12 +88,14 @@ class Participant(Base):
             pmu_id=participant_data["numPmu"],
             disadvantage_value=participant_data["handicapValeur"] if "handicapValeur" in participant_data else None,
             disadvantage_weight=participant_data["handicapPoids"] if "handicapPoids" in participant_data else None,
-            disadvantage_length=participant_data["handicapDistance"] if "handicapDistance" in participant_data else None,
+            disadvantage_length=participant_data[
+                "handicapDistance"] if "handicapDistance" in participant_data else None,
             blinders=participant_data["oeilleres"],
             lane_id=participant_data["placeCorde"] if "placeCorde" in participant_data else None,
             music=participant_data["musique"],
             pregnent=participant_data["jumentPleine"],
-            weighed_duration_km=participant_data["reductionKilometrique"] if "reductionKilometrique" in participant_data else None)
+            weighed_duration_km=participant_data[
+                "reductionKilometrique"] if "reductionKilometrique" in participant_data else None)
 
 
 class Race(Base):
@@ -118,7 +121,7 @@ class Race(Base):
     penetrometre_value = Column(Integer)
     racetrack_name = Column(String)
     racetrack_type = Column(String)
-    participants = relationship("Participant")
+    participants = relationship("Participant", backref="race")
     UniqueConstraint(start_date, race_id, meeting_id)
 
     def get_pmu_id(self):
@@ -127,6 +130,10 @@ class Race(Base):
     @staticmethod
     def build_pmu_id(date_string, meeting_id, race_id):
         return F'{date_string}R{meeting_id}C{race_id}'
+
+    @staticmethod
+    def build_pmu_id_from_race_data(date_string, race_data):
+        return Race.build_pmu_id(date_string, race_data['numReunion'], race_data['numOrdre'])
 
     @staticmethod
     def fromJson(race_data, meeting_data, date_string):

@@ -1,9 +1,9 @@
 ## AI project
-# goal of this project is to get hands on AI and machine learning
-# It's based on Pytorch techno
-#
-# It is a horse race pronostics application
-#
+goal of this project is to get hands on AI and machine learning
+
+It's based on Pytorch techno
+
+It is a horse race pronostics application
 
 ## Data source:
 https://online.turfinfo.api.pmu.fr/rest/client/1/programme/26052017?meteo=true&specialisation=INTERNET
@@ -41,9 +41,22 @@ docker build .
 
 Your mongoDB will be listening on localhost:27017
 
+Once the noSql DB is running, there is a script to scrap data:
+```
+python scripts/scrap_data.py
+```
+A start date might be specified, the latest scrapping date is used otherwise.
 
 ## Data Modeling
 
+The raw data are structured and persisted in RDMS database using ORM sqlAlchemy.
+
+There is a script to load raw data from mongo. The mongo DB must be running.
+```
+python scripts/load_data_to_model.py [-s startdate] [-e enddate]
+```
+
+End date is optional. It falls back on the current day.  
 
 ## Data compilation
 Take care to course.categorieParticularite includes "autostart"
