@@ -1,18 +1,35 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
 from source.model import Base, Horse, Race, Driver, Participant
-from sqlalchemy import select
+from sqlalchemy import select, create_engine
 
 
-def create_session(db_uri):
-    engine = create_engine(db_uri)
+def get_engine(db_uri):
+    engine = create_engine(db_uri, future=True, )
     Base.metadata.create_all(engine)
-    return Session(engine)
+    return engine
+
+
+class SessionProxy:
+    '''Session proxy should implement ORM session interface as used by DAO
+    The proxy is shared accross DAOs
+    The real session is handled at higher layer.
+    The transaction life cycle begin/commit/rollback/close can be shared across several domain DAOs.
+    '''
+    def __init__(self):
+        self.session = None
+
+    def set_new_session(self, session):
+        self.session = session
+
+    def add(self, domainObject):
+        return self.session.add(domainObject)
+
+    def execute(self, statement):
+        return self.session.execute(statement)
 
 
 class DriverDao:
-    def __init__(self, session):
-        self.session = session
+    def __init__(self, session_proxy):
+        self.session = session_proxy
 
     def save_driver(self, driver):
         if not self.get_driver_by_name(driver.name):
@@ -32,8 +49,8 @@ class DriverDao:
 
 
 class HorseDao:
-    def __init__(self, session):
-        self.session = session
+    def __init__(self, session_proxy):
+        self.session = session_proxy
 
     def save_horse(self, horse):
         if not self.get_horse_by_name(horse.name):
@@ -53,8 +70,8 @@ class HorseDao:
 
 
 class ParticipantDao:
-    def __init__(self, session):
-        self.session = session
+    def __init__(self, session_proxy):
+        self.session = session_proxy
 
     def save_participant(self, participant):
         if not self.get_participant_by_race(participant.race_id, participant.horse_id):
@@ -74,8 +91,8 @@ class ParticipantDao:
 
 
 class RaceDao:
-    def __init__(self, session):
-        self.session = session
+    def __init__(self, session_proxy):
+        self.session = session_proxy
 
     def save_race(self, race):
         if not self.get_race_by_pmu_id(race.date_string, race.meeting_id, race.race_id):

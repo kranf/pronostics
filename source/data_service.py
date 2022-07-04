@@ -1,46 +1,50 @@
 import logging
 
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 
 from source import RaceDao
-from source.dao import create_engine, ParticipantDao, DriverDao, HorseDao
+from source.dao import ParticipantDao, DriverDao, HorseDao, SessionProxy, get_engine
 from source.model import Race, Horse, Participant, Driver
 from source.utils import get_date_string_from_date
 
 
 def get_data_service(db_uri):
-    engine = create_engine(db_uri)
-    session = Session(engine)
-    raceDao = RaceDao(session)
-    horseDao = HorseDao(session)
-    driverDao = DriverDao(session)
-    participantDao = ParticipantDao(session)
-    return DataService(engine, raceDao, horseDao, driverDao, participantDao)
+    engine = get_engine(db_uri)
+    sessionProxy = SessionProxy()
+    raceDao = RaceDao(sessionProxy)
+    horseDao = HorseDao(sessionProxy)
+    driverDao = DriverDao(sessionProxy)
+    participantDao = ParticipantDao(sessionProxy)
+    return DataService(engine, sessionProxy, raceDao, horseDao, driverDao, participantDao)
 
 
 class DataService:
-    def __init__(self, engine, race_dao, horse_dao, driver_dao, participant_dao):
-        self.sessionMaker = sessionmaker(engine)
+    def __init__(self, engine, session_proxy, race_dao, horse_dao, driver_dao, participant_dao):
+        self.sessionMaker = sessionmaker(engine, expire_on_commit=False)
+        self.sessionProxy = session_proxy
         self.raceDao = race_dao
         self.horseDao = horse_dao
         self.driverDao = driver_dao
         self.participantDao = participant_dao
 
     def get_race(self, date_string, meeting_id, race_id):
-        return self.raceDao.get_race_by_pmu_id(date_string, meeting_id, race_id)
+        with self.sessionMaker.begin() as session:
+            self.sessionProxy.set_new_session(session)
+            return self.raceDao.get_race_by_pmu_id(date_string, meeting_id, race_id)
 
-    def save_race(self, raw_race, raw_participants, raw_participants_detailed_perf, meeting_data, date):
+    def save_race(self, raw_race, raw_participants, raw_participants_detailed_perf, meeting_data, program_date):
 
-        date_string = get_date_string_from_date(date)
+        date_string = get_date_string_from_date(program_date)
 
         with self.sessionMaker.begin() as session:
+            self.sessionProxy.set_new_session(session)
             race = Race.fromJson(raw_race, meeting_data, date_string)
             logging.info(f'Dealing with {race.get_pmu_id()}')
 
             _race = self.raceDao.save_race(race)
 
             for raw_participant in raw_participants:
-                _horse = Horse.fromJson(raw_participant, date.year - raw_participant['age'])
+                _horse = Horse.fromJson(raw_participant, program_date.year - raw_participant['age'])
                 horse = self.horseDao.save_horse(_horse)
                 logging.info(f'Horse {horse.name} saved with id {horse.id}')
                 _participant = Participant.fromJson(raw_participant, race.id, horse.id)

@@ -60,7 +60,7 @@ class Participant(Base):
     race_id = Column(Integer, ForeignKey('race.id'))
     rank = Column(Integer)
     horse_id = Column(Integer, ForeignKey("horse.id"))
-    horse = relationship("Horse")
+    horse = relationship("Horse", lazy="immediate")
     driver_name = Column(String, ForeignKey("driver.name"))
     driver = relationship("Driver")
     driver_change = Column(Boolean)
@@ -121,7 +121,7 @@ class Race(Base):
     penetrometre_value = Column(Integer)
     racetrack_name = Column(String)
     racetrack_type = Column(String)
-    participants = relationship("Participant", backref="race")
+    participants = relationship("Participant", backref="race", lazy="immediate")
     UniqueConstraint(start_date, race_id, meeting_id)
 
     def get_pmu_id(self):

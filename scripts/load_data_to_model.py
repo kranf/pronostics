@@ -44,6 +44,4 @@ for date_cursor in date_iterator:
             pmu_id = Race.build_pmu_id_from_race_data(date_string, raw_race)
             raw_participants = scrappedDataService.get_participants_for_race(pmu_id)
             raw_participants_detailed_perf = scrappedDataService.get_participants_detailed_perf_for_race(pmu_id)
-            race = dataService.save_race(raw_race, raw_participants, raw_participants_detailed_perf, meeting,
-                                         date_cursor)
-            logging.info(f'{race.participants[0].driver_name}')
+            race = dataService.save_race(raw_race, raw_participants, raw_participants_detailed_perf, meeting,date_cursor)
