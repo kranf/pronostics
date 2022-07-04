@@ -58,8 +58,13 @@ python scripts/load_data_to_model.py [-s startdate] [-e enddate]
 
 End date is optional. It falls back on the current day.  
 
-## Data compilation
+## Data features
+
+
+
 Take care to course.categorieParticularite includes "autostart"
+
+
 
 
 ## Good to know about horse races
@@ -76,12 +81,12 @@ La musique se lit de gauche à droite, la gauche correspondant à la course la p
         (m) = trot monté
         (a) = trot attelé
         (o) = obstacles
-        (c)= cross
+        (c) = cross
         (h) = haies
 
     Les lettres majuscules  indiquent les fautes s’il y en a eu :
         (A) = arrêté
-        (D) =disqualifié
+        (D) = disqualifié
         (T) = tombé
         (Ret) = rétrogradé
     Les chiffres entre parenthèses donnent l’année de la course : cette donnée est optionnelle car elle n’est pas la plus importante.
