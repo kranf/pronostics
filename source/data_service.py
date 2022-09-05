@@ -41,15 +41,29 @@ class DataService:
             race = Race.fromJson(raw_race, meeting_data, date_string)
             logging.info(f'Dealing with {race.get_pmu_id()}')
 
-            _race = self.raceDao.save_race(race)
+            saved_race = self.raceDao.save_race(race)
 
+            # length seems to be in meters
+            if saved_race.length_unit != 'METRE':
+                raise RuntimeError(f'Unsupported race length unit: {saved_race.length_unit}')
+
+            raw_participants.sort(key=lambda element: element.rank)
+            distance_at_arrival = saved_race.length
             for raw_participant in raw_participants:
                 _horse = Horse.fromJson(raw_participant, program_date.year - raw_participant['age'])
                 horse = self.horseDao.save_horse(_horse)
                 logging.info(f'Horse {horse.name} saved with id {horse.id}')
-                _participant = Participant.fromJson(raw_participant, race.id, horse.id)
+                distance_at_arrival = distance_at_arrival - convert_horse_distance(raw_participant['distanceChevalPrecedent'])
+                speed = distance_at_arrival / saved_race.duration
+                _participant = Participant.fromJson(raw_participant, race.id, horse.id, speed)
                 participant = self.participantDao.save_participant(_participant)
                 logging.info(f'Saving {participant.horse.name} for race {race.get_pmu_id()}')
+
+            ordered_participants = sorted(saved_race.participants, key=lambda element: element.rank)
+            logging.debug(f'================== ordered participant =================')
+            logging.debug(saved_race.participants)
+            for participant in ordered_participants:
+                print(participant.rank, participant.prior_horse_distance)
 
             if len(raw_participants_detailed_perf) > 0:
                 for raw_participant_detailed_perf in raw_participants_detailed_perf:
@@ -62,4 +76,4 @@ class DataService:
                                 logging.info(f'Driver {driver.name} saved with id {driver.id}')
 
             session.commit()
-            return _race
+            return saved_race

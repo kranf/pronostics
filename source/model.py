@@ -4,7 +4,7 @@ from sqlalchemy import (
     Integer,
     String,
     DateTime,
-    ForeignKey, UniqueConstraint
+    ForeignKey, UniqueConstraint, Float
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -61,6 +61,7 @@ class Participant(Base):
     rank = Column(Integer)
     horse_id = Column(Integer, ForeignKey("horse.id"))
     horse = relationship("Horse", lazy="immediate")
+    age = Column(Integer)
     driver_name = Column(String, ForeignKey("driver.name"))
     driver = relationship("Driver")
     driver_change = Column(Boolean)
@@ -73,16 +74,19 @@ class Participant(Base):
     music = Column(String)
     pregnent = Column(Boolean)
     weighed_duration_km = Column(Integer)
+    prior_horse_distance = Column(Integer)
+    speed = Column(Float)
     UniqueConstraint(race_id, horse_id)
 
     @staticmethod
-    def fromJson(participant_data, race_id, horse_id):
+    def fromJson(participant_data, race_id, horse_id, speed):
         """
         @params: Participant_date as returned participants endpoint
         """
         return Participant(
             race_id=race_id, rank=participant_data["ordreArrivee"] if "ordreArrivee" in participant_data else None,
             horse_id=horse_id,
+            age=participant_data['age'],
             driver_name=participant_data['driver'] if 'driver' in participant_data else None,
             driver_change=participant_data["driverChange"],
             pmu_id=participant_data["numPmu"],
@@ -95,7 +99,11 @@ class Participant(Base):
             music=participant_data["musique"],
             pregnent=participant_data["jumentPleine"],
             weighed_duration_km=participant_data[
-                "reductionKilometrique"] if "reductionKilometrique" in participant_data else None)
+                "reductionKilometrique"] if "reductionKilometrique" in participant_data else None,
+            prior_horse_distance=participant_data["distanceChevalPrecedent"][
+                "libelleLong"] if "distanceChevalPrecedent" in participant_data else None,
+            speed=speed
+        )
 
 
 class Race(Base):
