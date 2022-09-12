@@ -19,12 +19,14 @@ class ScrappedDataService:
         self.mongo_db.participants_detailed_perf.create_index([(RACE_PMU_ID, pymongo.ASCENDING)], unique=True)
 
     def get_latest_scrapping(self):
-        date_latest = self.mongo_db.latest_scrapping.find_one()["latest"]
-        return datetime.strptime(date_latest, settings.DATE_FORMAT).date()
+        date_latest_insertion = self.mongo_db.latest_scrapping.find_one()
+        return datetime.strptime(date_latest_insertion['latest'], settings.DATE_FORMAT).date() \
+            if date_latest_insertion \
+            else None
 
     def set_latest_scrapping(self, _date):
         current_latest = self.get_latest_scrapping()
-        if not _date > current_latest:
+        if not current_latest or not _date > current_latest:
             return
 
         self.mongo_db.latest_scrapping.delete_many({})
