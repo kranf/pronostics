@@ -84,7 +84,8 @@ class Participant(Base):
         @params: Participant_date as returned participants endpoint
         """
         return Participant(
-            race_id=race_id, rank=participant_data["ordreArrivee"] if "ordreArrivee" in participant_data else None,
+            race_id=race_id,
+            rank=participant_data["ordreArrivee"] if "ordreArrivee" in participant_data else None,
             horse_id=horse_id,
             age=participant_data['age'],
             driver_name=participant_data['driver'] if 'driver' in participant_data else None,

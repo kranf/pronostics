@@ -45,6 +45,8 @@ def convert_horse_distance(distance):
         "tete": 0.1,
         "cte enc.": 0.15,
         "encolure": 0.25,
+        "loin": 50,
+        "ex-aequo": 0,
     }
 
     fraction_dict = {
@@ -55,7 +57,7 @@ def convert_horse_distance(distance):
 
     standard_unit = 'L'
 
-    if not standard_unit in distance:
+    if not f' {standard_unit}' in distance:
         if not distance.lower() in distance_dict:
             raise RuntimeError(f'Unknown distance {distance}')
         return distance_dict[distance.lower()] * length_unit_in_meter

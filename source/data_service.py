@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from source import RaceDao
 from source.dao import ParticipantDao, DriverDao, HorseDao, SessionProxy, get_engine
 from source.model import Race, Horse, Participant, Driver
-from source.utils import get_date_string_from_date
+from source.utils import get_date_string_from_date, convert_horse_distance
 
 
 def get_data_service(db_uri):
@@ -47,23 +47,23 @@ class DataService:
             if saved_race.length_unit != 'METRE':
                 raise RuntimeError(f'Unsupported race length unit: {saved_race.length_unit}')
 
-            raw_participants.sort(key=lambda element: element.rank)
+            raw_participants.sort(key=lambda element: element['ordreArrivee'] if 'ordreArrivee' in element else 1000)
             distance_at_arrival = saved_race.length
             for raw_participant in raw_participants:
                 _horse = Horse.fromJson(raw_participant, program_date.year - raw_participant['age'])
                 horse = self.horseDao.save_horse(_horse)
                 logging.info(f'Horse {horse.name} saved with id {horse.id}')
-                distance_at_arrival = distance_at_arrival - convert_horse_distance(raw_participant['distanceChevalPrecedent'])
-                speed = distance_at_arrival / saved_race.duration
+
+                # Concern everything but TROT
+                # Trot speed can be calculated with tempsObtenu
+                distance_at_arrival = distance_at_arrival - convert_horse_distance(raw_participant['distanceChevalPrecedent']['libelleCourt']) \
+                    if 'distanceChevalPrecedent' in raw_participant \
+                    else distance_at_arrival
+                speed = distance_at_arrival / saved_race.duration if 'distanceChevalPrecedent' in raw_participant \
+                    else None
                 _participant = Participant.fromJson(raw_participant, race.id, horse.id, speed)
                 participant = self.participantDao.save_participant(_participant)
-                logging.info(f'Saving {participant.horse.name} for race {race.get_pmu_id()}')
-
-            ordered_participants = sorted(saved_race.participants, key=lambda element: element.rank)
-            logging.debug(f'================== ordered participant =================')
-            logging.debug(saved_race.participants)
-            for participant in ordered_participants:
-                print(participant.rank, participant.prior_horse_distance)
+                logging.info(f'Saving {participant.horse.name} for race {race.get_pmu_id()} - Rank: {participant.rank} - speed: {participant.speed}')
 
             if len(raw_participants_detailed_perf) > 0:
                 for raw_participant_detailed_perf in raw_participants_detailed_perf:
