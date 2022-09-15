@@ -39,7 +39,7 @@ class DataService:
         with self.sessionMaker.begin() as session:
             self.sessionProxy.set_new_session(session)
             race = Race.fromJson(raw_race, meeting_data, date_string)
-            logging.info(f'Dealing with {race.get_pmu_id()}')
+            logging.info(f'Dealing with {race.get_pmu_id()} - {meeting_data["disciplinesMere"][0]} - {meeting_data["hippodrome"]["libelleLong"]}')
 
             saved_race = self.raceDao.save_race(race)
 
@@ -54,13 +54,14 @@ class DataService:
                 horse = self.horseDao.save_horse(_horse)
                 logging.info(f'Horse {horse.name} saved with id {horse.id}')
 
-                # Concern everything but TROT
-                # Trot speed can be calculated with tempsObtenu
-                distance_at_arrival = distance_at_arrival - convert_horse_distance(raw_participant['distanceChevalPrecedent']['libelleCourt']) \
-                    if 'distanceChevalPrecedent' in raw_participant \
-                    else distance_at_arrival
-                speed = distance_at_arrival / saved_race.duration if 'distanceChevalPrecedent' in raw_participant \
-                    else None
+                if meeting_data['disciplinesMere'][0] == 'TROT':
+                    speed = saved_race.length / raw_participant['tempsObtenu'] if 'tempsObtenu' in raw_participant else None
+                else:
+                    distance_at_arrival = distance_at_arrival - convert_horse_distance(raw_participant['distanceChevalPrecedent']['libelleCourt']) \
+                        if 'distanceChevalPrecedent' in raw_participant \
+                        else distance_at_arrival
+                    speed = distance_at_arrival / saved_race.duration if 'distanceChevalPrecedent' in raw_participant \
+                        else None
                 _participant = Participant.fromJson(raw_participant, race.id, horse.id, speed)
                 participant = self.participantDao.save_participant(_participant)
                 logging.info(f'Saving {participant.horse.name} for race {race.get_pmu_id()} - Rank: {participant.rank} - speed: {participant.speed}')
