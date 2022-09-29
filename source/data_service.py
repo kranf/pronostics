@@ -41,11 +41,11 @@ class DataService:
             race = Race.fromJson(raw_race, meeting_data, date_string)
             logging.info(f'Dealing with {race.get_pmu_id()} - {meeting_data["disciplinesMere"][0]} - {meeting_data["hippodrome"]["libelleLong"]}')
 
-            saved_race = self.raceDao.save_race(race)
-
             # length seems to be in meters
-            if saved_race.length_unit != 'METRE':
-                raise RuntimeError(f'Unsupported race length unit: {saved_race.length_unit}')
+            if race.length_unit != 'METRE':
+                raise RuntimeError(f'Unsupported race length unit: {race.length_unit}')
+
+            saved_race = self.raceDao.save_race(race)
 
             raw_participants.sort(key=lambda element: element['ordreArrivee'] if 'ordreArrivee' in element else 1000)
             distance_at_arrival = saved_race.length
@@ -57,14 +57,23 @@ class DataService:
                 if meeting_data['disciplinesMere'][0] == 'TROT':
                     speed = saved_race.length / raw_participant['tempsObtenu'] if 'tempsObtenu' in raw_participant else None
                 else:
-                    distance_at_arrival = distance_at_arrival - convert_horse_distance(raw_participant['distanceChevalPrecedent']['libelleCourt']) \
-                        if 'distanceChevalPrecedent' in raw_participant \
-                        else distance_at_arrival
-                    speed = distance_at_arrival / saved_race.duration if 'distanceChevalPrecedent' in raw_participant \
-                        else None
-                _participant = Participant.fromJson(raw_participant, race.id, horse.id, speed)
-                participant = self.participantDao.save_participant(_participant)
-                logging.info(f'Saving {participant.horse.name} for race {race.get_pmu_id()} - Rank: {participant.rank} - speed: {participant.speed}')
+                    if not saved_race.duration:
+                        speed = None
+                    elif 'ordreArrivee' in raw_participant and raw_participant['ordreArrivee'] == 1:
+                        speed = saved_race.length / saved_race.duration
+                    elif 'ordreArrivee' not in raw_participant:
+                        speed = None
+                    elif 'distanceChevalPrecedent' not in raw_participant:
+                        speed = None
+                    else:
+                        distance_at_arrival = distance_at_arrival - convert_horse_distance(raw_participant['distanceChevalPrecedent']['libelleCourt'])
+                        speed = distance_at_arrival / saved_race.duration
+
+                participant = Participant.fromJson(raw_participant, race.id, horse.id, speed)
+                saved_participant = self.participantDao.save_participant(participant)
+                logging.info(f'Saving {saved_participant.horse.name} for race {race.get_pmu_id()} - Rank: {saved_participant.rank} - speed: {saved_participant.speed}')
+                if not saved_participant.speed:
+                    logging.warning(f'Speed was not defined for horse {saved_participant.horse.name}')
 
             if len(raw_participants_detailed_perf) > 0:
                 for raw_participant_detailed_perf in raw_participants_detailed_perf:
