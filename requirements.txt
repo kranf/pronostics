@@ -20,7 +20,7 @@ mypy==0.941
 mypy-extensions==0.4.3
 numpy==1.22.0
 packaging==21.3
-pandas==1.4.2
+pandas==1.5.0
 parso==0.7.1
 Pillow==9.0.0
 platformdirs==2.5.1
@@ -49,7 +49,7 @@ tomli==2.0.1
 torch==1.10.1
 torchaudio==0.10.1
 torchvision==0.11.2
-typing_extensions==4.0.1
+typing-extensions==4.0.1
 ujson==5.1.0
 urllib3==1.26.9
 wrapt==1.13.3
