@@ -87,3 +87,28 @@ class DataService:
 
             session.commit()
             return saved_race
+
+    def get_participations_for_horse(self, horse_name):
+
+        with self.sessionMaker.begin() as session:
+            self.sessionProxy.set_new_session(session)
+            horse = self.horseDao.get_horse_by_name(horse_name)
+            return self.participantDao.get_participations_for_horse(horse.id)
+
+    def get_all_races(self):
+        session = self.sessionMaker()
+        self.sessionProxy.set_new_session(session)
+        result = self.raceDao.get_all()
+        return SessionAwareResultIterator(result, session)
+
+class SessionAwareResultIterator:
+
+    def __init__(self, iterableResult, sessionToClose):
+        self.iterableResult = iterableResult
+        self.session = sessionToClose
+
+    def __iter__(self):
+        for item in self.iterableResult:
+            if not item:
+                self.session.close()
+            yield item

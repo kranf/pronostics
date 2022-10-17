@@ -89,6 +89,11 @@ class ParticipantDao:
 
         return result[0]
 
+    def get_participations_for_horse(self, horse_id):
+        statement = select(Participant).where(Participant.horse_id == horse_id)
+        result = self.session.execute(statement).scalars().unique().all()
+
+        return result
 
 class RaceDao:
     def __init__(self, session_proxy):
@@ -103,11 +108,9 @@ class RaceDao:
     def get_race_by_pmu_id(self, date, meeting_id, race_id):
         """pmu id is aggregation of date, meeting_id and race_id"""
         statement = select(Race).where(Race.date_string == date, Race.meeting_id == meeting_id, Race.race_id == race_id)
-        result = self.session.execute(statement).scalars().all()
-        if len(result) == 0:
-            return None
+        return self.session.execute(statement).scalars().one()
 
-        if len(result) > 1:
-            raise RuntimeError()
-
-        return result[0]
+    def get_all(self):
+        statement = select(Race).execution_options(yield_per=10)
+        result = self.session.execute(statement).scalars()
+        return result
