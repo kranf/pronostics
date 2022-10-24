@@ -1,9 +1,10 @@
-## AI project
-# goal of this project is to get hands on AI and machine learning
-# It's based on Pytorch techno
-#
-# It is a horse race pronostics application
-#
+AI project
+
+Horse race pronostics application
+
+goal of this project is to get hands on AI and machine learning
+It's based on Pytorch techno
+
 
 ## Data source:
 https://online.turfinfo.api.pmu.fr/rest/client/1/programme/26052017?meteo=true&specialisation=INTERNET
