@@ -10,7 +10,7 @@ def get_engine(db_uri):
 
 class SessionProxy:
     '''Session proxy should implement ORM session interface as used by DAO
-    The proxy is shared accross DAOs
+    The proxy is shared across DAOs
     The real session is handled at higher layer.
     The transaction life cycle begin/commit/rollback/close can be shared across several domain DAOs.
     '''
@@ -20,8 +20,8 @@ class SessionProxy:
     def set_new_session(self, session):
         self.session = session
 
-    def add(self, domainObject):
-        return self.session.add(domainObject)
+    def add(self, domain_object):
+        return self.session.add(domain_object)
 
     def execute(self, statement):
         return self.session.execute(statement)
