@@ -1,24 +1,49 @@
-class RaceMapper:
-    def __init__(self, race):
-        self.race = race
+RACE_FEATURE_LIST = [
+    'is_diurnal',
+    'is_nocturnal',
+    'is_half_nocturnal',
+    'length_in_meter',
+]
 
-    def to_race_features(self):
-        self.validate_race(self.race)
-        return {
-            'is_diurnal': int(self.race.nature.lower() == 'diurne'),
-            'is_nocturnal': int(self.race.nature.lower() == 'nocturne'),
-            'is_half_nocturnal': int(self.race.nature.lower() == 'seminocturne'),
-            'length_in_meter': self.race.length,
-        }
 
-    def to_participants_features(self):
-        return [self.to_participant_features(participant) for participant in self.race.participants]
+PARTICIPANT_FEATURE_LIST = [
+    'p{pmu_id}_driver_change',
+    'p{pmu_id}_lane_id',
+]
 
-    def to_participant_features(self, participant):
-        return {
-            f'p{participant.pmu_id}_driver_change': int(participant.driver_change),
-            f'p{participant.pmu_id}_lane_id': int(participant.lane_id),
-        }
 
-    def validate_race(self):
-        assert self.race.nature.lower() in ['diurne', 'nocturne', 'seminocturne']
+def get_feature_list(max_number_of_participant=22):
+    return [feature_name.format(pmu_id=pmu_id)
+                for feature_name in PARTICIPANT_FEATURE_LIST
+                for pmu_id in range(1, max_number_of_participant) ] + RACE_FEATURE_LIST
+
+
+def to_features(race):
+    feature = to_race_features(race)
+    for participant in race.participants:
+        feature.update(to_participant_features(participant))
+    return feature
+
+def to_race_features(race):
+    validate_race(race)
+    return {
+        'is_diurnal': int(race.nature.lower() == 'diurne'),
+        'is_nocturnal': int(race.nature.lower() == 'nocturne'),
+        'is_half_nocturnal': int(race.nature.lower() == 'seminocturne'),
+        'length_in_meter': race.length,
+    }
+
+
+def to_participants_features(race):
+    return [to_participant_features(participant) for participant in race.participants]
+
+
+def to_participant_features(participant):
+    return {
+        f'p{participant.pmu_id}_driver_change': int(participant.driver_change),
+        f'p{participant.pmu_id}_lane_id': int(participant.lane_id),
+    }
+
+
+def validate_race(race):
+    assert race.nature.lower() in ['diurne', 'nocturne', 'seminocturne']
