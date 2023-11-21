@@ -34,10 +34,10 @@ class Horse(Base):
             birth_year=birth_year,
             gender=horse_data["sexe"],
             race=horse_data["race"],
-            owner=horse_data["proprietaire"],
+            owner=horse_data["proprietaire"] if "proprietaire" in horse_data else None,
             father_name=horse_data["nomPere"] if "nomPere" in horse_data else None,
             mother_name=horse_data["nomMere"] if "nomMere" in horse_data else None,
-            trainer=horse_data["entraineur"],
+            trainer=horse_data["entraineur"] if "entraineur" in horse_data else None,
             breeder=horse_data["eleveur"] if "eleveur" in horse_data else None, )
 
 
