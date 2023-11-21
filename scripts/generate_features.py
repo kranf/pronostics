@@ -6,6 +6,7 @@ import csv
 
 from dotenv import load_dotenv
 import os
+import pandas as pd
 
 from source.data_service import get_data_service
 from source.machine_learning.mapper import to_features, get_feature_list
@@ -22,9 +23,8 @@ dataService = get_data_service(DB_URI)
 
 races = dataService.get_all_races()
 
-with open(TRAINING_DATASET_FILE, 'w') as csvfile:
-    csvWriter = csv.DictWriter(csvfile, get_feature_list())
-    csvWriter.writeheader()
-    for race in races:
-        feature = to_features(race)
-        csvWriter.writerow(feature)
+race_series = pd.Series()
+for race in races:
+    features = pd.Series(to_features(race))
+    race_series = pd.concat(race_series, features)
+    print(features)

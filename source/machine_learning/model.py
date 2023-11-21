@@ -19,7 +19,6 @@ class ParticipantDetailsFeatures(TypedDict):
     disadvantage_weight_mean: int
     average_speed: float
 
-
 class FeatureBuilder:
     def __init__(self):
         pass
@@ -50,7 +49,6 @@ def to_features(race, participant):
         'disadvantage_value_mean': participant.disadvantage_value,
         'disadvantage_length_mean': participant.disadvantage_length,
         'disadvantage_weight_mean': participant.disadvantage_weight,
-        'average_speed': par
     }
 
 
