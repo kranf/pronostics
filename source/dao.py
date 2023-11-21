@@ -100,15 +100,15 @@ class RaceDao:
         self.session = session_proxy
 
     def save_race(self, race):
-        if not self.get_race_by_pmu_id(race.date_string, race.meeting_id, race.race_id):
+        if not self.find_race_by_pmu_id(race.date_string, race.meeting_id, race.race_id):
             self.session.add(race)
 
-        return self.get_race_by_pmu_id(race.date_string, race.meeting_id, race.race_id)
+        return self.find_race_by_pmu_id(race.date_string, race.meeting_id, race.race_id)
 
-    def get_race_by_pmu_id(self, date, meeting_id, race_id):
+    def find_race_by_pmu_id(self, date, meeting_id, race_id):
         """pmu id is aggregation of date, meeting_id and race_id"""
         statement = select(Race).where(Race.date_string == date, Race.meeting_id == meeting_id, Race.race_id == race_id)
-        return self.session.execute(statement).scalars().one()
+        return self.session.execute(statement).scalars().one_or_none()
 
     def get_all(self):
         statement = select(Race).execution_options(yield_per=10)
