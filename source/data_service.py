@@ -55,7 +55,8 @@ class DataService:
                 logging.info(f'Horse {horse.name} saved with id {horse.id}')
 
                 if meeting_data['disciplinesMere'][0] == 'TROT':
-                    speed = saved_race.length / raw_participant['tempsObtenu'] if 'tempsObtenu' in raw_participant else None
+                    speed = saved_race.length / raw_participant['tempsObtenu'] \
+                        if 'tempsObtenu' in raw_participant and raw_participant['tempsObtenu'] != 0 else None
                 else:
                     if not saved_race.duration:
                         speed = None
