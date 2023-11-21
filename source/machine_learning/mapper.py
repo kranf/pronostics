@@ -31,6 +31,12 @@ def to_race_features(race):
         'is_nocturnal': int(race.nature.lower() == 'nocturne'),
         'is_half_nocturnal': int(race.nature.lower() == 'seminocturne'),
         'length_in_meter': race.length,
+        'field_is_flat': int(race.field.lower() == 'plat'),
+        'field_is_harness': int(race.field.lower() == 'attele'),
+        'field_is_hurdle': int(race.field.lower() == 'haie'),
+        'field_is_saddle': int(race.field.lower() == 'monte'),
+        'field_is_steeplechase': int(race.field.lower() == 'steeplechase'),
+        'field_is_cross': int(race.field.lower() == 'cross'),
     }
 
 
@@ -47,3 +53,4 @@ def to_participant_features(participant):
 
 def validate_race(race):
     assert race.nature.lower() in ['diurne', 'nocturne', 'seminocturne']
+    assert race.field.lower() in ['plat', 'attele', 'haie', 'monte', 'steeplechase', 'cross']
