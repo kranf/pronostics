@@ -26,5 +26,5 @@ races = dataService.get_all_races()
 race_series = pd.Series()
 for race in races:
     features = pd.Series(to_features(race))
-    race_series = pd.concat(race_series, features)
+    race_series = pd.concat([race_series, features])
     print(features)
