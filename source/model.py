@@ -78,7 +78,10 @@ class Participant(Base):
     prior_horse_distance = Column(Integer)
     speed = Column(Float)
     UniqueConstraint(race_id, horse_id)
-
+ 
+    def __str__(self):
+        return f'{self.horse.name} | pmuId: {self.pmu_id} | Field: {self.race.field} | rank: {self.rank} | lane: {self.lane_id}'
+    
     @staticmethod
     def fromJson(participant_data, race_id, horse_id, speed):
         """
@@ -137,6 +140,9 @@ class Race(Base):
     def get_pmu_id(self):
         return self.build_pmu_id(self.date_string, self.meeting_id, self.race_id)
 
+    def __str__(self):
+        return f'Race {self.get_pmu_id()} | Name {self.name}'
+    
     @staticmethod
     def build_pmu_id(date_string, meeting_id, race_id):
         return F'{date_string}R{meeting_id}C{race_id}'
